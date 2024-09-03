@@ -5,10 +5,10 @@ import android.os.Bundle
 import androidx.preference.Preference
 import com.oscar.aikeyboard.R
 import com.oscar.aikeyboard.keyboard.KeyboardSwitcher
+import com.oscar.aikeyboard.keyboard.internal.KeyboardIconsSet
 import com.oscar.aikeyboard.latin.utils.defaultClipboardToolbarPref
 import com.oscar.aikeyboard.latin.utils.defaultPinnedToolbarPref
 import com.oscar.aikeyboard.latin.utils.defaultToolbarPref
-import com.oscar.aikeyboard.latin.utils.getToolbarIconByName
 import com.oscar.aikeyboard.latin.utils.reorderDialog
 
 class ToolbarSettingsFragment : SubScreenFragment() {
@@ -16,6 +16,8 @@ class ToolbarSettingsFragment : SubScreenFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val iconsSet = KeyboardIconsSet.instance
+        iconsSet.loadIcons(requireContext())
         addPreferencesFromResource(R.xml.prefs_screen_toolbar)
 
         findPreference<Preference>(Settings.PREF_TOOLBAR_KEYS)?.onPreferenceClickListener =
@@ -23,7 +25,7 @@ class ToolbarSettingsFragment : SubScreenFragment() {
                 reorderDialog(
                     requireContext(), Settings.PREF_TOOLBAR_KEYS, defaultToolbarPref,
                     R.string.toolbar_keys
-                ) { getToolbarIconByName(it, requireContext()) }
+                ) { iconsSet.getNewDrawable(it, requireContext()) }
                 true
             }
         findPreference<Preference>(Settings.PREF_PINNED_TOOLBAR_KEYS)?.onPreferenceClickListener =
@@ -31,7 +33,7 @@ class ToolbarSettingsFragment : SubScreenFragment() {
                 reorderDialog(
                     requireContext(), Settings.PREF_PINNED_TOOLBAR_KEYS, defaultPinnedToolbarPref,
                     R.string.pinned_toolbar_keys
-                ) { getToolbarIconByName(it, requireContext()) }
+                ) { iconsSet.getNewDrawable(it, requireContext()) }
                 true
             }
         findPreference<Preference>(Settings.PREF_CLIPBOARD_TOOLBAR_KEYS)?.onPreferenceClickListener =
@@ -39,7 +41,7 @@ class ToolbarSettingsFragment : SubScreenFragment() {
                 reorderDialog(
                     requireContext(), Settings.PREF_CLIPBOARD_TOOLBAR_KEYS, defaultClipboardToolbarPref,
                     R.string.clipboard_toolbar_keys
-                ) { getToolbarIconByName(it, requireContext()) }
+                ) { iconsSet.getNewDrawable(it, requireContext()) }
                 true
             }
     }

@@ -224,7 +224,7 @@
         <!-- Popup keys keyboard layout template -->
         <attr name="popupKeysTemplate" format="reference" />
         <!-- Icon set for key top and key preview. These should be aligned with
-             {@link helium314.keyboard.keyboard.internal.KeyboardIconsSet#NAMES_AND_ATTR_IDS} -->
+             {@link com.oscar.aikeyboard.keyboard.internal.KeyboardIconsSet#NAMES_AND_ATTR_IDS} -->
         <attr name="iconShiftKey" format="reference" />
         <attr name="iconDeleteKey" format="reference" />
         <attr name="iconSettingsKey" format="reference" />

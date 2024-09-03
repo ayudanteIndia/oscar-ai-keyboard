@@ -104,6 +104,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 
+import com.oscar.aikeyboard.keyboard.internal.KeyboardIconsSet;
 
 /**
  * Input method implementation for Qwerty'ish keyboard.
@@ -573,6 +574,7 @@ public class LatinIME extends InputMethodService implements
         Settings.init(this);
         DebugFlags.init(this);
         SubtypeSettingsKt.init(this);
+        KeyboardIconsSet.Companion.getInstance().loadIcons(this);
         RichInputMethodManager.init(this);
         mRichImm = RichInputMethodManager.getInstance();
         AudioAndHapticFeedbackManager.init(this);
@@ -621,7 +623,7 @@ public class LatinIME extends InputMethodService implements
                 editorInfo, isFullscreenMode(), getPackageName());
         mSettings.loadSettings(this, locale, inputAttributes);
         final SettingsValues currentSettingsValues = mSettings.getCurrent();
-       AudioAndHapticFeedbackManager.getInstance().onSettingsChanged(currentSettingsValues);
+        AudioAndHapticFeedbackManager.getInstance().onSettingsChanged(currentSettingsValues);
         // This method is called on startup and language switch, before the new layout has
         // been displayed. Opening dictionaries never affects responsivity as dictionaries are
         // asynchronously loaded.
