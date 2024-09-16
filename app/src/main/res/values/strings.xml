@@ -978,4 +978,5 @@ New dictionary:
 10.If you have any questions about this Privacy Policy, please contact us at <a href="mailto:support.oscar@samyarth.org"><font color="#000000">support.oscar@samyarth.org</font></a>.
 
     </string>
+    <string name="key_recognition_language">recognitionLanguage</string>
 </resources>

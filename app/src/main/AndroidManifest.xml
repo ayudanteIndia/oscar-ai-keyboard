@@ -19,6 +19,10 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL"
         tools:ignore="ProtectedPermissions" />
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <queries>
         <intent>
             <action android:name="android.speech.RecognitionService" />
@@ -155,6 +159,15 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
             </intent-filter>
         </receiver>
 
+        <service
+            android:name="org.oscar.kb.service.SpeechRecognitionService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="microphone"
+            android:permission="android.permission.FOREGROUND_SERVICE" />
+
+        <receiver android:name="org.oscar.kb.broadcastReceiver.DestroyServiceReceiver"
+            android:exported="false"/>
     </application>
 
     <queries>

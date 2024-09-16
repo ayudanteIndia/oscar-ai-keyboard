@@ -17,11 +17,13 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
+import android.media.MediaRecorder;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -79,6 +81,8 @@ import com.oscar.aikeyboard.latin.utils.Log;
 import com.oscar.aikeyboard.latin.utils.ToolbarKey;
 import com.oscar.aikeyboard.latin.utils.ToolbarUtilsKt;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
@@ -150,35 +154,29 @@ public final class SuggestionStripView extends RelativeLayout implements OnClick
 
     @Override
     public void onReadyForSpeech(Bundle params) {
-        Log.e("RecognitionListener", "onReadyForSpeech" + params);
+        // Not required for code functionality
     }
 
     @Override
     public void onBeginningOfSpeech() {
-        Log.e("RecognitionListener", "onBeginningOfSpeech");
-        lvTextProgress.setVisibility(View.VISIBLE);
+        // Not required for code functionality
     }
 
     @Override
     public void onRmsChanged(float rmsdB) {
-        Log.d("RecognitionListener", "onRmsChanged" + rmsdB);
-        //aiOutput = findViewById(R.id.ai_output);
-        aiOutput.setVisibility(View.GONE);
+        // Not required for core functionality
     }
 
     @Override
     public void onBufferReceived(byte[] buffer) {
-        Log.e("RecognitionListener", "onBufferReceived" + Arrays.toString(buffer));
-
+        // Not required for core functionality
     }
 
     @Override
     public void onEndOfSpeech() {
-        Log.e("RecognitionListener", "onEndOfSpeech");
         lvTextProgress.setVisibility(View.GONE);
         aiOutput.setVisibility(View.VISIBLE);
     }
-
 
     @Override
     public void onError(int error) {
@@ -223,7 +221,6 @@ public final class SuggestionStripView extends RelativeLayout implements OnClick
 //        }
 //        Log.e("RecognitionListener", "onError" + error);
     }
-
 
     @Override
     public void onResults(Bundle results) {
@@ -342,7 +339,8 @@ public final class SuggestionStripView extends RelativeLayout implements OnClick
 
     private final LottieAnimationView lvTextProgress;
 
-    private final LottieAnimationView tvAudioProgress;
+    //private final LottieAnimationView tvAudioProgress;
+    private final ImageView tvAudioProgress;
 
     private SpeechRecognizer speechRecognizer;
 
@@ -952,9 +950,11 @@ public final class SuggestionStripView extends RelativeLayout implements OnClick
             if (recordStatus) {
                 manualStopRecord = true;
                 stopRecord();
+                //stopRecordMediaPlayer();
             }else if (isInternetAvailable()) {
                     manualStopRecord = false;
                     startRecord();
+                    //startRecordMediaPlayer();
                     aiOutput.setText("");
                 } else {
                     Toast.makeText(this.getContext(), "Oops! Internet connection lost.", Toast.LENGTH_SHORT).show();
@@ -1029,18 +1029,18 @@ public final class SuggestionStripView extends RelativeLayout implements OnClick
     private boolean recordStatus = false;
     private boolean manualStopRecord = false;
 
-
     private void stopRecord() {
-        tvAudioProgress.pauseAnimation();
+        //tvAudioProgress.pauseAnimation();
+        tvAudioProgress.setImageDrawable(getResources().getDrawable(R.drawable.baseline_mic_24));
         Toast.makeText(getContext(), "Recording stopped", Toast.LENGTH_SHORT).show();
         //ivOscarVoiceInput.setImageDrawable(getResources().getDrawable(R.drawable.baseline_mic_off_24));
         recordStatus = false;
         speechRecognizer.stopListening();
     }
 
-
     private void startRecord() {
-        tvAudioProgress.playAnimation();
+        //tvAudioProgress.playAnimation();
+        tvAudioProgress.setImageDrawable(getResources().getDrawable(R.drawable.ic_pause));
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(getContext());
         speechRecognizer.setRecognitionListener(this);
         Log.d(TAG, "Recording started");
@@ -1051,7 +1051,7 @@ public final class SuggestionStripView extends RelativeLayout implements OnClick
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.US);
-        intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 30000);
+
         speechRecognizer.startListening(intent);
 
         //ivOscarVoiceInput.setImageDrawable(getResources().getDrawable(R.drawable.sym_keyboard_voice_holo));
@@ -1133,5 +1133,67 @@ public final class SuggestionStripView extends RelativeLayout implements OnClick
         }
         return false;
     }
+    private MediaRecorder mediaRecorder;
 
+    private void startRecordMediaPlayer() {
+        if (isInternetAvailable()) {
+            manualStopRecord = false;
+            // Initialize MediaRecorder
+            mediaRecorder = new MediaRecorder();
+            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+            mediaRecorder.setOutputFile(getRecordingFilePath()); // Replace with your file path logic
+            try {
+                mediaRecorder.prepare();
+                mediaRecorder.start();
+                //tvAudioProgress.playAnimation();
+                Log.d(TAG, "Recording started");
+                Toast.makeText(getContext(), "Recording started", Toast.LENGTH_SHORT).show();
+
+                // Start SpeechRecognizer (same as before)
+                speechRecognizer = SpeechRecognizer.createSpeechRecognizer(getContext());
+                speechRecognizer.setRecognitionListener(this);
+                Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.US);
+                speechRecognizer.startListening(intent);
+            } catch (IOException e) {
+                Log.e(TAG, "Error starting MediaRecorder", e);
+                Toast.makeText(getContext(), "Error recording audio", Toast.LENGTH_SHORT).show();
+                releaseMediaRecorder(); // Release resources in case of failure
+            }
+        } else {
+            Toast.makeText(this.getContext(), "Oops! Internet connection lost.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void stopRecordMediaPlayer() {
+        if (mediaRecorder != null) {
+            try {
+                mediaRecorder.stop(); // Stop recording
+            } catch (Exception e) {
+                Log.e(TAG, "Error stopping MediaRecorder", e);
+            } finally {
+                releaseMediaRecorder(); // Release resources
+                //tvAudioProgress.pauseAnimation();
+                Log.e("RecognitionListener", "onStopListening");
+                speechRecognizer.stopListening(); // Stop SpeechRecognizer
+                Toast.makeText(getContext(), "Recording stopped", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void releaseMediaRecorder() {
+        if (mediaRecorder != null) {
+            mediaRecorder.release();
+            mediaRecorder = null;
+        }
+    }
+
+    // Function to get a unique recording file path (optional)
+    private String getRecordingFilePath() {
+        File outputDir = getContext().getExternalFilesDir(Environment.DIRECTORY_MUSIC);
+        return outputDir + "/recorded_audio_" + System.currentTimeMillis() + ".3gp";
+    }
 }
